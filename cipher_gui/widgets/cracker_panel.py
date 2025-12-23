@@ -325,6 +325,9 @@ class CrackerPanel(QFrame):
             self.status_message.emit("Error: Missing input")
             return
         
+        # Store original plaintext letter count for padding removal
+        self.original_plaintext_length = sum(1 for c in plaintext if c.isalpha())
+        
         # Capture output
         import io
         import sys
@@ -346,8 +349,8 @@ class CrackerPanel(QFrame):
                 self.cracked_key[1,0], self.cracked_key[1,1]
             )
             
-            # Verify by decrypting
-            decrypted = self.cracker.decrypt(ciphertext, self.cracked_key)
+            # Verify by decrypting (with original length to strip padding)
+            decrypted = self.cracker.decrypt(ciphertext, self.cracked_key, self.original_plaintext_length)
             
             # Method used
             method = "Brute Force" if "brute force" in output.lower() else "Algebraic"
@@ -449,7 +452,9 @@ class CrackerPanel(QFrame):
             self.decrypt_result.setText("")
             return
         
-        decrypted = self.cracker.decrypt(ciphertext, self.cracked_key)
+        # Use original plaintext length if available to strip padding
+        original_len = getattr(self, 'original_plaintext_length', None)
+        decrypted = self.cracker.decrypt(ciphertext, self.cracked_key, original_len)
         if decrypted:
             self.decrypt_result.setText(decrypted)
             self.status_message.emit(f"Decrypted: {decrypted}")

@@ -274,8 +274,14 @@ class HillCipherCracker:
             result += self._num_to_char(enc[0]) + self._num_to_char(enc[1])
         return result
     
-    def decrypt(self, ciphertext, key):
-        """Decrypt ciphertext using key matrix, preserving original case and spacing"""
+    def decrypt(self, ciphertext, key, original_plaintext_length=None):
+        """Decrypt ciphertext using key matrix, preserving original case and spacing.
+        
+        Args:
+            ciphertext: The ciphertext to decrypt
+            key: The key matrix
+            original_plaintext_length: If provided, strips padding 'X' if it was added
+        """
         key_inv = self._matrix_mod_inverse_2x2(key)
         if key_inv is None:
             print("Error: Key is not invertible")
@@ -300,6 +306,20 @@ class HillCipherCracker:
             else:
                 # Preserve non-alphabetic characters (spaces, punctuation)
                 result += char
+        
+        # Strip padding X if original plaintext length is known and was odd
+        if original_plaintext_length is not None:
+            # Count letters in result
+            result_letters = sum(1 for c in result if c.isalpha())
+            if result_letters > original_plaintext_length and result.rstrip()[-1].upper() == 'X':
+                # Remove the last character (padding X)
+                # Find and remove the last letter
+                result_list = list(result)
+                for i in range(len(result_list) - 1, -1, -1):
+                    if result_list[i].isalpha():
+                        result_list.pop(i)
+                        break
+                result = ''.join(result_list)
         
         return result
     
