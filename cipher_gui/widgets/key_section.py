@@ -1,7 +1,7 @@
 """Key input section widget."""
 
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit
+from PyQt6.QtCore import pyqtSignal, Qt
 
 
 class KeySection(QFrame):
@@ -12,12 +12,13 @@ class KeySection(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("section")
+        self.setMinimumHeight(220)
         self.setup_ui()
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
-        layout.setSpacing(10)
+        layout.setContentsMargins(16, 12, 16, 12)
+        layout.setSpacing(6)
         
         # Header
         header = QHBoxLayout()
@@ -38,43 +39,60 @@ class KeySection(QFrame):
         self.key_input.textChanged.connect(self.key_changed.emit)
         layout.addWidget(self.key_input)
         
-        # Key help - RIGHT BELOW input, readable
+        # Key help - compact single line
         self.key_help_text = QLabel()
-        self.key_help_text.setWordWrap(True)
-        self.key_help_text.setStyleSheet("""
-            color: #7d8590;
-            font-size: 11px;
-            background-color: rgba(88, 166, 255, 0.06);
-            padding: 8px 10px;
-            border-radius: 6px;
-            border-left: 2px solid #58a6ff;
-            margin-top: 6px;
-        """)
+        self.key_help_text.setWordWrap(False)
+        self.key_help_text.setStyleSheet("color: #58a6ff; font-size: 10px; padding: 2px 0;")
         layout.addWidget(self.key_help_text)
         
-        # Key validation indicator - compact
-        self.key_validation = QLabel()
-        self.key_validation.setStyleSheet("font-size: 11px; color: #7d8590; margin-top: 4px;")
-        layout.addWidget(self.key_validation)
+        # Validation area - QTextEdit with always-visible scrollbar
+        self.key_validation = QTextEdit()
+        self.key_validation.setReadOnly(True)
+        self.key_validation.setMinimumHeight(80)
+        self.key_validation.setMaximumHeight(100)
+        self.key_validation.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.key_validation.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.key_validation.setStyleSheet("""
+            QTextEdit {
+                background-color: #161b22;
+                border: 1px solid #30363d;
+                border-radius: 4px;
+                color: #7d8590;
+                font-size: 11px;
+                padding: 4px;
+            }
+            QScrollBar:vertical {
+                background: #21262d;
+                width: 10px;
+                border-radius: 5px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical {
+                background: #484f58;
+                border-radius: 5px;
+                min-height: 20px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #6e7681;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+        """)
+        layout.addWidget(self.key_validation, 1)
     
     def set_key_help(self, help_data):
-        """Set key help information."""
+        """Set key help information - compact single line."""
         if isinstance(help_data, dict):
-            format_text = help_data.get('format', '')
             example_text = help_data.get('example', '')
-            tip_text = help_data.get('tip', help_data.get('details', ''))
+            format_text = help_data.get('format', '')
             
-            help_text = ""
-            if format_text:
-                help_text += f"<b>Format:</b> {format_text}<br>"
-            if example_text:
-                help_text += f"<b>Example:</b> <code style='background-color: #1c2128; padding: 2px 6px; border-radius: 3px;'>{example_text}</code><br>"
-            if tip_text:
-                help_text += f"<b>Tip:</b> {tip_text}"
-            
-            self.key_help_text.setText(help_text)
+            # Compact format: just show example in placeholder and format hint
             if example_text:
                 self.key_input.setPlaceholderText(f"e.g., {example_text}")
+            if format_text:
+                self.key_help_text.setText(f"Format: {format_text}")
+                self.key_help_text.setToolTip(help_data.get('tip', help_data.get('details', '')))
+            else:
+                self.key_help_text.setText("")
         else:
             self.key_help_text.setText(str(help_data))
             self.key_input.setPlaceholderText("Enter key...")
@@ -89,10 +107,22 @@ class KeySection(QFrame):
             self.key_validation.setText("")
         elif is_valid:
             self.key_validation.setText(f"✓ {message}")
-            self.key_validation.setStyleSheet("color: #4CAF50; font-size: 11px;")
+            self.key_validation.setStyleSheet("""
+                QTextEdit { background-color: #161b22; border: 1px solid #30363d; border-radius: 4px; color: #4CAF50; font-size: 11px; padding: 4px; }
+                QScrollBar:vertical { background: #21262d; width: 10px; border-radius: 5px; margin: 2px; }
+                QScrollBar::handle:vertical { background: #484f58; border-radius: 5px; min-height: 20px; }
+                QScrollBar::handle:vertical:hover { background: #6e7681; }
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+            """)
         else:
             self.key_validation.setText(f"✗ {message}")
-            self.key_validation.setStyleSheet("color: #f44336; font-size: 11px;")
+            self.key_validation.setStyleSheet("""
+                QTextEdit { background-color: #161b22; border: 1px solid #30363d; border-radius: 4px; color: #f44336; font-size: 11px; padding: 4px; }
+                QScrollBar:vertical { background: #21262d; width: 10px; border-radius: 5px; margin: 2px; }
+                QScrollBar::handle:vertical { background: #484f58; border-radius: 5px; min-height: 20px; }
+                QScrollBar::handle:vertical:hover { background: #6e7681; }
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+            """)
     
     def clear(self):
         """Clear the key input."""

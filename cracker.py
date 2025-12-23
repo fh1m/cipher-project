@@ -275,17 +275,32 @@ class HillCipherCracker:
         return result
     
     def decrypt(self, ciphertext, key):
-        """Decrypt ciphertext using key matrix"""
+        """Decrypt ciphertext using key matrix, preserving original case and spacing"""
         key_inv = self._matrix_mod_inverse_2x2(key)
         if key_inv is None:
             print("Error: Key is not invertible")
             return None
         
         digraphs = self._text_to_digraphs(ciphertext)
-        result = ''
+        decrypted_letters = ''
         for dg in digraphs:
             dec = self._encrypt_digraph(dg, key_inv)
-            result += self._num_to_char(dec[0]) + self._num_to_char(dec[1])
+            decrypted_letters += self._num_to_char(dec[0]) + self._num_to_char(dec[1])
+        
+        # Restore original case and spacing from ciphertext
+        result = ''
+        letter_idx = 0
+        for char in ciphertext:
+            if char.isalpha():
+                if letter_idx < len(decrypted_letters):
+                    dec_char = decrypted_letters[letter_idx]
+                    # Preserve original case
+                    result += dec_char.lower() if char.islower() else dec_char.upper()
+                    letter_idx += 1
+            else:
+                # Preserve non-alphabetic characters (spaces, punctuation)
+                result += char
+        
         return result
     
     def format_key(self, key):

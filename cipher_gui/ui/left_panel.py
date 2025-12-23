@@ -5,7 +5,6 @@ from PyQt6.QtCore import pyqtSignal
 from cipher_gui.widgets.modern_button import ModernButton
 from cipher_gui.widgets.input_section import InputSection
 from cipher_gui.widgets.key_section import KeySection
-from cipher_gui.widgets.options_section import OptionsSection
 from cipher_gui.widgets.output_section import OutputSection
 
 
@@ -54,15 +53,11 @@ class LeftPanel(QFrame):
         
         # Input section (flexible height)
         self.input_section = InputSection()
-        layout.addWidget(self.input_section, 3)  # Takes 3/10 of space
+        layout.addWidget(self.input_section, 2)  # Reduced from 3
         
-        # Key section (compact)
+        # Key section (more space for validation messages)
         self.key_section = KeySection()
-        layout.addWidget(self.key_section, 1)  # Takes 1/10 of space
-        
-        # Options section (compact)
-        self.options_section = OptionsSection()
-        layout.addWidget(self.options_section, 0)  # Fixed size
+        layout.addWidget(self.key_section, 4)  # Increased - options removed
         
         # Action button - slimmer
         self.action_btn = ModernButton("Encrypt Now", "#3fb950")
@@ -160,9 +155,9 @@ class LeftPanel(QFrame):
         
         layout.addLayout(quick_actions)
         
-        # Output section (flexible height)
+        # Output section (reduced height for small texts)
         self.output_section = OutputSection()
-        layout.addWidget(self.output_section, 3)  # Takes 3/10 of space
+        layout.addWidget(self.output_section, 1)  # Reduced from 2
         
         # Set initial mode
         self._set_mode("encrypt")

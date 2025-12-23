@@ -221,6 +221,19 @@ class CipherGUI(QMainWindow):
         swap_action.triggered.connect(self.swap_texts)
         edit_menu.addAction(swap_action)
         
+        # Options menu
+        options_menu = menubar.addMenu("&Options")
+        
+        self.preserve_case_action = QAction("Preserve Case", self)
+        self.preserve_case_action.setCheckable(True)
+        self.preserve_case_action.setChecked(True)
+        options_menu.addAction(self.preserve_case_action)
+        
+        self.save_history_action = QAction("Save to History", self)
+        self.save_history_action.setCheckable(True)
+        self.save_history_action.setChecked(True)
+        options_menu.addAction(self.save_history_action)
+        
         # View menu
         view_menu = menubar.addMenu("&View")
         
@@ -356,7 +369,7 @@ class CipherGUI(QMainWindow):
             )
             
             # Add to history
-            if self.left_panel.options_section.should_save_history():
+            if self.save_history_action.isChecked():
                 self.history_manager.add_entry(
                     cipher_name, mode, input_text, key_text, result
                 )
@@ -439,10 +452,10 @@ class CipherGUI(QMainWindow):
         self.settings_manager.save_cipher_index(self.header.get_current_index())
         self.settings_manager.save_mode(self.left_panel.get_mode())
         self.settings_manager.save_preserve_case(
-            self.left_panel.options_section.should_preserve_case()
+            self.preserve_case_action.isChecked()
         )
         self.settings_manager.save_auto_history(
-            self.left_panel.options_section.should_save_history()
+            self.save_history_action.isChecked()
         )
     
     def restore_settings(self):
@@ -460,10 +473,10 @@ class CipherGUI(QMainWindow):
         self.left_panel._set_mode(mode)
         
         preserve_case = self.settings_manager.restore_preserve_case()
-        self.left_panel.options_section.set_preserve_case(preserve_case)
+        self.preserve_case_action.setChecked(preserve_case)
         
         auto_history = self.settings_manager.restore_auto_history()
-        self.left_panel.options_section.set_auto_history(auto_history)
+        self.save_history_action.setChecked(auto_history)
     
     def closeEvent(self, event):
         """Handle window close event."""

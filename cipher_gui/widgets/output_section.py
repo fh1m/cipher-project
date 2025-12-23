@@ -78,7 +78,8 @@ class OutputSection(QFrame):
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
         self.text_edit.setPlaceholderText("Results will appear here...")
-        self.text_edit.setMinimumHeight(120)
+        self.text_edit.setMinimumHeight(60)
+        self.text_edit.setMaximumHeight(100)
         layout.addWidget(self.text_edit)
     
     def set_label(self, text):
