@@ -1,0 +1,8 @@
+# Classical Cipher Tool - Dependencies
+# =====================================
+
+# Core dependencies
+numpy>=1.20.0
+
+# GUI dependencies (optional for CLI-only usage)
+PyQt6>=6.0.0
